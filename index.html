@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Contacts Manager</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                margin: 20px;
+                background-color: #f5f5f5;
+            }
+            
+            #table {
+                background: white;
+                border-radius: 8px;
+                padding: 20px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                margin-bottom: 20px;
+            }
+            
+            table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+            
+            tr {
+                border-bottom: 1px solid #eee;
+                cursor: pointer;
+                transition: background-color 0.2s;
+            }
+            
+            tr:hover {
+                background-color: #f9f9f9;
+            }
+            
+            td {
+                padding: 10px;
+                vertical-align: middle;
+            }
+            
+            td img {
+                border-radius: 50%;
+                object-fit: cover;
+            }
+            
+            button {
+                background-color: #007bff;
+                color: white;
+                border: none;
+                padding: 10px 20px;
+                border-radius: 5px;
+                cursor: pointer;
+                margin-right: 10px;
+                font-size: 14px;
+            }
+            
+            button:hover {
+                background-color: #0056b3;
+            }
+            
+            h5 {
+                margin: 0;
+                color: #333;
+            }
+            
+            .loading {
+                text-align: center;
+                color: #666;
+                font-style: italic;
+            }
+        </style>
+    </head>
+    <body onload="fetchContacts()">
+        <div id="table" class="loading">Contacts loading ...</div>
+        <button id="refresh" type="button">Refresh</button>
+        <button id="addContact" type="button">Add Contact</button>
+
+        <script src="config.js"></script>
+
+        <script>
+            // Add event listeners
+            document.getElementById("refresh").addEventListener('click', fetchContacts);
+            document.getElementById("addContact").addEventListener('click', addContact);
+
+            function fetchContacts(){
+                // Show loading message
+                document.getElementById('table').innerHTML = '<div class="loading">Contacts loading ...</div>';
+                
+                fetch(rootPath + "/controller/get-contacts/")
+                .then(function(response){
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(function(data){
+                    displayOutput(data);
+                    console.log(data);
+                })
+                .catch(function(error){
+                    console.error('Error fetching contacts:', error);
+                    document.getElementById('table').innerHTML = '<div class="loading">Error loading contacts. Please try again.</div>';
+                });
+            }
+
+            function displayOutput(data){
+                let output = "<table>";
+
+                for(let a in data){ 
+                    output += `
+                        <tr onclick="editContact(${data[a].id})">
+                            <td> <img src="${rootPath}controller/uploads/${data[a].avatar}" width="40" height="40" alt="Avatar"/> </td>
+                            <td> <h5>${data[a].firstname}</h5> </td>
+                            <td> <h5>${data[a].lastname}</h5> </td>
+                        </tr>
+                    `;
+                }
+
+                output += '</table>';
+                document.getElementById('table').innerHTML = output;
+            }
+
+            function addContact(){
+                window.open("add-contact.html", "_self");
+            }   
+
+            function editContact(id){
+                window.open("edit-contact.html?id=" + id, "_self");
+            }
+        </script>
+    </body>
+</html>
